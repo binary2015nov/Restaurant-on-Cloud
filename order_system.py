@@ -17,7 +17,7 @@ def insert_order(order_id, selected_table):
     data = [order_id, order_table_no, localtime, order_details_id]
     
     insert_stm = f"insert into ORDERING_SYSTEM.CORE.DISH_ORDER values ('{data[0]}','{data[1]}','{data[2]}','{data[3]}','{data[2]}');"
-    st.write(insert_stm)
+    # st.write(insert_stm)
     session.sql(insert_stm).collect()
 
 def insert_order_detail(order_id, food_dict):
@@ -30,7 +30,7 @@ def insert_order_detail(order_id, food_dict):
                 , ORDERING_SYSTEM.CORE.DISH_ORDER  b\
                 where a.dish_name = '{key}'\
                 and b.order_id = '{order_id}';"
-        st.write(insert_stm)
+        # st.write(insert_stm)
         session.sql(insert_stm).collect()
 
 def insert_inventory(order_id):
@@ -45,7 +45,7 @@ def insert_inventory(order_id):
                   on d.dish_id = c.dish_id\
                 where a.order_id = '{order_id}'\
                 group by d.ingre_id ;"
-    st.write(select_stm)
+    # st.write(select_stm)
     res = session.sql(select_stm).collect() 
     for r in res: 
         inger_id= r[0]
@@ -55,19 +55,19 @@ def insert_inventory(order_id):
                     select INGRE_ID, REMIAN_AMOUNT - {change_count}, BASE_UNIT, '{localtime}','{localtime}' , -1*{change_count}, INGRE_COST\
                     from ORDERING_SYSTEM.CORE.INVENTORY where INGRE_ID = {inger_id}\
                     order by insert_time desc limit 1 ;"
-        st.write(insert_stm)
+        # st.write(insert_stm)
         session.sql(insert_stm).collect()
 
 
 def get_max_order_id():
     table_name = 'ORDERING_SYSTEM.CORE.DISH_ORDER'
     select_stm = f"select max(order_id) from {table_name}"
-    #st.write(select_stm)
+    # st.write(select_stm)
     return session.sql(select_stm).collect() 
 
 def generate_order_id():
     max_order_id = get_max_order_id()[0][0]
-    #st.write(max_order_id)
+    # st.write(max_order_id)
     if localdate == max_order_id[0:8]:
         return int(max_order_id)+1
     else:
