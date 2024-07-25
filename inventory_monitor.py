@@ -11,7 +11,7 @@ from session_builder import session
 sql = '''
 with a as(
 select * from (select ingre_id,remian_amount, update_time,
-                ROW_NUMBER() OVER (PARTITION BY ingre_id order by UPDATE_TIME desc) as rk 
+                ROW_NUMBER() OVER (PARTITION BY ingre_id order by insert_time desc) as rk 
                 from inventory)a where a.rk=1 order by ingre_id )
 ,b as (
 select ingre_id,ingre_name from ingredient group by ingre_id,ingre_name
@@ -69,6 +69,6 @@ def show_latest_data():
     # st.write(st.session_state.data.to_dict()['REMIAN_AMOUNT'].items())
     for k,v in st.session_state.data.to_dict()['REMIAN_AMOUNT'].items():
         if v < 1000:
-            st.warning(f'Warning! Remain amount for {k} is less than 100000 g, currently remaining {v}.',icon="⚠️")
+            st.warning(f'Warning! Remain amount for {k} is less than 1000 g, currently remaining {v}.',icon="⚠️")
 
 show_latest_data()
