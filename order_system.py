@@ -114,10 +114,11 @@ if ingredients:
 if ingredients and selected_table:
     insert_flag = st.button("Submit order")
     if insert_flag:
-        order_id = generate_order_id() 
+        with st.spinner('Waiting...'):
+            order_id = generate_order_id() 
 
-        insert_order(order_id, selected_table)
-        insert_order_detail(order_id, food_dict)
-        insert_inventory(order_id)
-        st.success('Ordered!', icon="✅")
+            insert_order(order_id, selected_table)
+            insert_order_detail(order_id, food_dict)
+            insert_inventory(order_id)
+            st.success('Ordered!', icon="✅")
 
