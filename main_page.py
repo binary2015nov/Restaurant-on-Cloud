@@ -5,6 +5,7 @@ if "logged_in" not in st.session_state:
 
 
 def login():
+    st.write("# Welcome ! 👋")
     form = st.form("my_form")
     username = form.text_input("Username", value='')
     pwd = form.text_input("Password", value='', type="password")
@@ -38,7 +39,7 @@ st.set_page_config(
     page_icon="👋",
 )
 
-#st.write("# Welcome ! 👋")
+
 
 # st.snow()
 
