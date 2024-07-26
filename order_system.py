@@ -73,6 +73,27 @@ def generate_order_id():
     else:
         return localdate+"0001"
 
+@st.fragment
+def select_food():
+    ingredients = st.multiselect(
+        "Choose food in your menu"
+        ,df
+        ,default = None
+    )
+
+    food_dict = {}
+    if ingredients:
+        for food in ingredients: 
+            food_count = st.number_input(label = food, 
+                                min_value=1, 
+                                max_value=100, 
+                                value=1, 
+                                step=1
+                                )
+            food_dict.update({food:food_count})
+        st.text(food_dict)
+    return ingredients,food_dict
+
 localtime=datetime.now().astimezone(pytz.timezone("Asia/Shanghai"))
 #st.write(localtime)
 localdate = str(localtime.date()).replace("-","")
@@ -82,43 +103,24 @@ table_no = ['01-01','01-02','01-03','01-04','02-01','02-02','02-03','02-04','03-
 
 st.title(":cup_with_straw: Restaurant :cup_with_straw:")
 
-
 df = session.table("ORDERING_SYSTEM.CORE.MENU").select(col("DISH_NAME"))
 
 selected_table = st.selectbox(
-    label ="Choose table"
-    ,options = table_no
-    ,index=None
+        label ="Choose table"
+        ,options = table_no
+        ,index=None
+    )
 
-)
+ingredients,food_dict = select_food()
 
-ingredients = ''
-ingredients = st.multiselect(
-    "Choose food in your menu"
-    ,df
-    ,default = None
-)
-
-food_dict = {}
-if ingredients:
-    for food in ingredients: 
-        food_count = st.number_input(label = food, 
-                             min_value=1, 
-                             max_value=100, 
-                             value=1, 
-                             step=1
-                            )
-        food_dict.update({food:food_count})
-    st.text(food_dict)
-
-if ingredients and selected_table:
-    insert_flag = st.button("Submit order")
-    if insert_flag:
+insert_flag = st.button("Submit Order")
+if insert_flag:
+    if selected_table and ingredients:
         with st.spinner('Waiting...'):
             order_id = generate_order_id() 
-
             insert_order(order_id, selected_table)
             insert_order_detail(order_id, food_dict)
             insert_inventory(order_id)
             st.success('Ordered!', icon="✅")
-
+    else:
+        st.warning("Please select table and food.", icon="⚠️")
