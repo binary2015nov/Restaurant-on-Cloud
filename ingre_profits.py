@@ -29,7 +29,7 @@ plt.legend(title = "Profit percentage:")
 plt.pie(profits, labels=dish_names, autopct='%1.1f%%')
  
 # Display the plot in Streamlit
-st.set_option('deprecation.showPyplotGlobalUse', False)
+# st.set_option('deprecation.showPyplotGlobalUse', False)
 st.pyplot()
 
 

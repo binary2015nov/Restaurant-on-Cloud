@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 start = st.date_input("Select the date", date.today())
 st.title(f'date {start}')
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
+# st.set_option('deprecation.showPyplotGlobalUse', False)
 df_table = session.table('ORDERING_SYSTEM.CORE.order_rank')
 
 
