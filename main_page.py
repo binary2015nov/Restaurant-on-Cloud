@@ -10,9 +10,7 @@ def login():
     username = form.text_input("Username", value='')
     pwd = form.text_input("Password", value='', type="password")
     if form.form_submit_button("Login"):
-        if username and pwd=="admin":
-            st.session_state.username = username
-            print(st.session_state.username)
+        if username=="admin" and pwd=="admin":
             st.session_state.logged_in = True
             st.rerun()
         else: 
