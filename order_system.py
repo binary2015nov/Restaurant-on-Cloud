@@ -4,7 +4,7 @@ import streamlit as st
 from snowflake.snowpark.functions import col
 from datetime import datetime
 from session_builder import session
-
+from random import randint
 import pytz
 
 # st.set_page_config(page_title="Start your order", page_icon="✅")
@@ -32,6 +32,11 @@ def insert_order_detail(order_id, food_dict):
                 and b.order_id = '{order_id}';"
         # st.write(insert_stm)
         session.sql(insert_stm).collect()
+
+def get_price():
+    table_name = 'ORDERING_SYSTEM.CORE.menu'
+    select_stm = f"select dish_id,dish_price,dish_name from  {table_name} order by dish_id"
+    return session.sql(select_stm).collect()
 
 def insert_inventory(order_id):
     select_stm = f"select \
@@ -73,26 +78,48 @@ def generate_order_id():
     else:
         return localdate+"0001"
 
+def get_max_piece(food):
+    sql = f'''with a as (
+    select * from menu where dish_name='{food}')
+    select b.ingre_name,b.amount from a left join  ingredient b on a.dish_id=b.dish_id'''
+    # st.write(sql)
+    ordered =  session.sql(sql).collect()
+    # st.write(ordered)
+    # st.write(st.session_state.remain)
+    min_list = []   
+    for i in ordered:
+        remain = list(filter(lambda x:x.INGRE_NAME == i.INGRE_NAME, st.session_state.remain))[0].REMIAN_AMOUNT
+        min_list.append(remain // i.AMOUNT)
+    # st.write(min_list)
+    # max_order = int(min(min_list))
+    return int(min(min_list))
+
+
 @st.fragment
 def select_food():
-    ingredients = st.multiselect(
+    foods = st.multiselect(
         "Choose food in your menu"
         ,df
         ,default = None
     )
-
+    total_price = 0
     food_dict = {}
-    if ingredients:
-        for food in ingredients: 
-            food_count = st.number_input(label = food, 
+    if foods:
+        for food in foods:   
+            unit_price = list(filter(lambda x:x.DISH_NAME == food, st.session_state.price))[0].DISH_PRICE
+            max_order = get_max_piece(food=food)
+            food_count = st.number_input(label = f'{food}: ${unit_price} (Max number: {max_order})', 
                                 min_value=1, 
-                                max_value=100, 
+                                max_value=max_order, 
                                 value=1, 
                                 step=1
                                 )
+            total_price += food_count*unit_price
+
             food_dict.update({food:food_count})
-        st.text(food_dict)
-    return ingredients,food_dict
+        st.text(f"Order detail: {' & '.join([f'{k} * {v}'  for k,v in food_dict.items()])} ")
+        st.text(f'Total price: {total_price}')
+    return foods,food_dict
 
 localtime=datetime.now().astimezone(pytz.timezone("Asia/Shanghai"))
 #st.write(localtime)
@@ -105,19 +132,33 @@ st.title(":cup_with_straw: Restaurant :cup_with_straw:")
 
 df = session.table("ORDERING_SYSTEM.CORE.MENU").select(col("DISH_NAME"))
 
+inven_remains = session.sql(''' with tmp as (
+ select * from (select ingre_id,remian_amount,
+                ROW_NUMBER() OVER (PARTITION BY ingre_id order by insert_time desc) as rk 
+                from ORDERING_SYSTEM.CORE.INVENTORY)a  where a.rk= 1)
+select distinct ingredient.ingre_name,tmp.remian_amount from tmp left join ORDERING_SYSTEM.CORE.ingredient
+                             on tmp.ingre_id=ingredient.ingre_id ''').collect()
+
 selected_table = st.selectbox(
         label ="Choose table"
         ,options = table_no
         ,index=None
     )
 
-ingredients,food_dict = select_food()
+if 'price' not in st.session_state:
+    st.session_state.price = get_price()
+
+if 'remain' not in st.session_state:
+    st.session_state.remain = inven_remains
+foods,food_dict = select_food()
 
 insert_flag = st.button("Submit Order")
 if insert_flag:
-    if selected_table and ingredients:
+    if selected_table and foods:
         with st.spinner('Waiting...'):
+            
             order_id = generate_order_id() 
+            
             insert_order(order_id, selected_table)
             insert_order_detail(order_id, food_dict)
             insert_inventory(order_id)

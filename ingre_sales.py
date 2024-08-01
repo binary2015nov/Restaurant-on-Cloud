@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 # st.sidebar.header("Ingredient sales")
 
 start = st.date_input("Select the date", date.today())
-st.title(f'date {start}')
+# st.title(f'date {start}')
 
 # st.set_option('deprecation.showPyplotGlobalUse', False)
 df_table = session.table('ORDERING_SYSTEM.CORE.order_rank')
@@ -29,7 +29,7 @@ dish_names = sale_rank.loc[:,'DISH_NAME']
 
 #pandas dataframe is case sensitive
 sales = sale_rank.loc[:,'SALE_NO']
-plt.legend(title = "Sale numbers percentage:")
+# plt.legend(title = "Sale numbers percentage:")
 plt.pie(sales, labels=dish_names, autopct='%1.1f%%')
 st.pyplot()
 
