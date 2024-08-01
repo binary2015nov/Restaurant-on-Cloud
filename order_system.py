@@ -85,7 +85,7 @@ def get_max_piece(food):
     # st.write(sql)
     ordered =  session.sql(sql).collect()
     # st.write(ordered)
-    # st.write(st.session_state.remain)
+    st.session_state.remain = session.sql(remainsql).collect()
     min_list = []   
     for i in ordered:
         remain = list(filter(lambda x:x.INGRE_NAME == i.INGRE_NAME, st.session_state.remain))[0].REMIAN_AMOUNT
@@ -132,12 +132,14 @@ st.title(":cup_with_straw: Restaurant :cup_with_straw:")
 
 df = session.table("ORDERING_SYSTEM.CORE.MENU").select(col("DISH_NAME"))
 
-inven_remains = session.sql(''' with tmp as (
+
+remainsql = ''' with tmp as (
  select * from (select ingre_id,remian_amount,
                 ROW_NUMBER() OVER (PARTITION BY ingre_id order by insert_time desc) as rk 
                 from ORDERING_SYSTEM.CORE.INVENTORY)a  where a.rk= 1)
 select distinct ingredient.ingre_name,tmp.remian_amount from tmp left join ORDERING_SYSTEM.CORE.ingredient
-                             on tmp.ingre_id=ingredient.ingre_id ''').collect()
+                             on tmp.ingre_id=ingredient.ingre_id '''
+
 
 selected_table = st.selectbox(
         label ="Choose table"
@@ -149,7 +151,7 @@ if 'price' not in st.session_state:
     st.session_state.price = get_price()
 
 if 'remain' not in st.session_state:
-    st.session_state.remain = inven_remains
+    st.session_state.remain = session.sql(remainsql).collect()
 foods,food_dict = select_food()
 
 insert_flag = st.button("Submit Order")
