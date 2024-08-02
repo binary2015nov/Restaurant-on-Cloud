@@ -5,7 +5,7 @@ from datetime import timedelta,date,datetime
 from session_builder import session
 
 start_date = st.date_input("Select the order start date", date.today())
-end_date = st.date_input("Select the order start date", date.today() + timedelta(days = 1))
+end_date = st.date_input("Select the order end date", date.today() + timedelta(days = 1))
 
 sql = f'''
 SELECT A.ORDER_ID, A.ORDER_TABLE_NO AS TABLE_NO, A.ORDER_DETAILS_ID, DISH_NAME, ROUND(DISH_PRICE, 2) AS DISH_PRICE, ROUND(DISH_AMOUNT) AS DISH_AMOUNT, ORDER_TIME, DISH_PRICE * DISH_AMOUNT AS TOTAL_COST 
@@ -21,7 +21,7 @@ df = session.sql(sql).to_pandas()
 df_grouped = df.groupby('ORDER_ID')
 
 # st.title(st.session_state.username + f"'s Orders history - {df_grouped.ngroups}:")
-st.title(f"Orders history - {df_grouped.ngroups}:")
+st.title(f"{df_grouped.ngroups} orders:")
 
 for order_id, order_details in df_grouped:
     st.subheader(f"Order ID: {order_id}\tTotal Cost: ${order_details['TOTAL_COST'].sum():.2f}") 
