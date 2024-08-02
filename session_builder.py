@@ -3,10 +3,10 @@ from snowflake.snowpark import Session
 def getSession():
     connection_parameters = {
     "account": "DNBTGEE-CN03889",
-    "user": "bruceshen2024",
-    "password": "Asdf.#34@1bin",
-    "role": "ACCOUNTADMIN",
-    "warehouse": "COMPUTE_WH",
+    "user": "APP_ACCESS_USER",
+    "password": "123456Aa",
+    "role": "MYROLE",
+    "warehouse": "APP_ACCESS_WH",
     "database": "ORDERING_SYSTEM",
     "schema": "CORE"
     }
